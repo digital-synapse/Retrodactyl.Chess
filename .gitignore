@@ -373,3 +373,4 @@ FodyWeavers.xsd
 **/obj/*
 **/bin/*
 **/lib/*
+**/*.cmd
