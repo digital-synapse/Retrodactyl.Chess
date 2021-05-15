@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AssemblyName>Retrodactyl.Chess</AssemblyName>
+    <RootNamespace>Retrodactyl.Chess</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="lib\**" />
+    <EmbeddedResource Remove="lib\**" />
+    <None Remove="lib\**" />
+  </ItemGroup>
+  <!--
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <PublishTrimmed>true</PublishTrimmed>
+    <PublishReadyToRun>true</PublishReadyToRun>
+	<PublishReadyToRunShowWarnings>true</PublishReadyToRunShowWarnings>
+    <PublishSingleFile>true</PublishSingleFile>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+  </PropertyGroup>
+  -->
+  <ItemGroup>
+    <None Remove="build.cmd" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="SFML.Net" Version="2.5.0" />
+    <Content Include="Program.cs" />
+    <Content Include="Grid.cs" />
+    <Content Include="DragManager.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="lib\Retrodactyl.Chess.Core\Retrodactyl.Chess.Core.csproj" />
+    <ProjectReference Include="lib\Retrodactyl.Extensions.DotNet\Retrodactyl.Extensions.DotNet.csproj" />
+    <ProjectReference Include="lib\Retrodactyl.Extensions.SFML\Retrodactyl.Extensions.SFML.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="data\background_512x512.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="data\black2_128x128.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="data\board_512x552.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="data\oldenglish.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="data\parchment.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="data\retrodactyl_logo.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="data\storybook.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="data\vignette_512x512.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="data\white3_128x128.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>
