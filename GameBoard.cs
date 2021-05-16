@@ -25,8 +25,9 @@ namespace Retrodactyl.Chess
             //chessGame = GameFactory.Create(chessPosition);
             //chessGame.NewGame();
             //chessState = new State();
+
             chessBoard = new Board(true);
-            
+            //chessBoard = new Board("rnb1k1nr/ppppbppp/8/4Q3/8/4P3/PPP2qPP/RNB1KBNR w 11");
 
             /*** setup "tiles" (the game piece sprites) ******************************************/
             blackRook = new Sprite(black[11]);

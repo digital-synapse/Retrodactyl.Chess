@@ -10,6 +10,7 @@
     <RepositoryUrl>https://github.com/digital-synapse/Retrodactyl.Chess</RepositoryUrl>
     <PackageTags>Retrodactyl</PackageTags>
     <Authors>digital-synapse</Authors>
+    <Version>0.1.0</Version>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
