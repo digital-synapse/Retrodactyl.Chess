@@ -12,20 +12,17 @@ namespace Retrodactyl.Chess
 {
     public class GameBoard : Grid
     {
-        public GameBoard(Sprite board, Sprite[] black, Sprite[] white, Vector2f position, Vector2u gridSize, Vector2f scale, uint gridLayers = 1, DragManager mouseManager = null, int dragLayer = -1, int dropLayer = -1, Vector2f dropScale = default, Vector2u cellSize = default)
-            : base(null, gridSize,scale,gridLayers,mouseManager,dragLayer,dropLayer,dropScale,cellSize)
+        public GameBoard(Sprite board, Sprite[] black, Sprite[] white, Font labelFont, Vector2f position, Vector2u gridSize, Vector2f scale, uint gridLayers = 1, DragManager mouseManager = null, int dragLayer = -1, int dropLayer = -1, Vector2f dropScale = default, Vector2u cellSize = default)
+            : base(null, gridSize, scale, gridLayers, mouseManager, dragLayer, dropLayer, dropScale, cellSize)
         {
+            font = labelFont;
+            boardSquareLabel = new Text("",font,17);
+            //boardSquareLabel.Style = Text.Styles.Bold;
+            
+            boardSquareLabel.OutlineThickness = 1;
+
             boardSprite = board;
             Position = position;
-
-            /*** Setup board state and logic *****************************************************/
-            //chessBoard = new Board();
-            //chessPieceValue = new PieceValue();
-            //chessPosition = new Position(chessBoard, chessPieceValue);
-            //chessGame = GameFactory.Create(chessPosition);
-            //chessGame.NewGame();
-            //chessState = new State();
-
             chessBoard = new Board(true);
             //chessBoard = new Board("rnb1k1nr/ppppbppp/8/4Q3/8/4P3/PPP2qPP/RNB1KBNR w 11");
 
@@ -66,7 +63,7 @@ namespace Retrodactyl.Chess
 
             updateBoardFromGameState();
         }
-
+        
         private void updateBoardFromGameState()
         {
             try
@@ -112,11 +109,20 @@ namespace Retrodactyl.Chess
         {
             if (chessBoard.CurrentPlayer == Player.Black) return null;
             var moves = chessBoard.GetMoves();
-            return moves.Where(m => m.piece == gamePiece.Piece)
+            return moves.Where(m => m.piece == gamePiece.Piece && chessBoard[m.to] == null)
+                .Select(m => new Vector2i(m.to.x, m.to.y))
+                .ToList();
+        }
+        protected override List<Vector2i> GetMovesOccupied(GamePiece gamePiece, Vector2i from)
+        {
+            if (chessBoard.CurrentPlayer == Player.Black) return null;
+            var moves = chessBoard.GetMoves();
+            return moves.Where(m => m.piece == gamePiece.Piece && chessBoard[m.to] != null)
                 .Select(m => new Vector2i(m.to.x, m.to.y))
                 .Concat(new[] { from })
                 .ToList();
         }
+
         protected override bool IsMoveAllowed(GamePiece gamePiece, Vector2i from, Vector2i to)
         {
             if (chessBoard.CurrentPlayer == Player.Black) return false;
@@ -160,23 +166,6 @@ namespace Retrodactyl.Chess
                         try
                         {
                             var ai = new GameAI();
-
-                            //var scoredMoves = ai.minimax_score(1, chessGame, false);
-                            //var best = ai.minimax_sort(6, chessGame, false,
-                            //    scoredMoves.OrderByDescending(x => x.Score));
-
-                            //var best = ai.minimax_shallow(5, chessGame, false);
-
-                            //var result = ai.BestMoveMiniMaxIterativeDeepening(chessGame);
-                            //var move = result.Move;
-
-                            //var result = ai.DepthFirstSearch(chessGame, 7);
-                            //var move = result.Move;
-
-                            //var fen = chessGame.Pos.GenerateFen();
-                            //var best = ai.minimax_inline(4, chessGame, false);
-                            //var move = best.move;
-
                             var best = ai.Search(chessBoard);
                             var move = best;
 

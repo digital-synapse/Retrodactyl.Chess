@@ -37,7 +37,9 @@ namespace Retrodactyl.Chess
             var boardSprite = FileSystem.LoadSprite("./data/board_512x552.png");
             var blackSprites = FileSystem.LoadTiles("./data/black2_128x128.png", 128, 128);
             var whiteSprites = FileSystem.LoadTiles("./data/white3_128x128.png", 128, 128);
-            GameBoard board = new GameBoard(boardSprite, blackSprites, whiteSprites, new Vector2f(), new Vector2u(8, 8), new Vector2f(1, 1), 1, mouseManager, 0, 0, new Vector2f(1, 1), new Vector2u(64, 64)); ;
+
+            var pixelFont = FileSystem.LoadFont("./data/rainyhearts.ttf");
+            GameBoard board = new GameBoard(boardSprite, blackSprites, whiteSprites, pixelFont, new Vector2f(), new Vector2u(8, 8), new Vector2f(1, 1), 1, mouseManager, 0, 0, new Vector2f(1, 1), new Vector2u(64, 64)); ;
             var busyIndicator = new BusyIndicator();
 
             var resize = new Action<float, float>((float width, float height) =>

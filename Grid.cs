@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Retrodactyl.Extensions.SFML;
+using Retrodactyl.Chess.Core;
 
 namespace Retrodactyl.Chess
 {
@@ -91,6 +92,7 @@ namespace Retrodactyl.Chess
                                 if (picked != null)
                                 {
                                     moves = GetMoves(picked, pickCoords);
+                                    movesOccupied = GetMovesOccupied(picked, pickCoords);
                                     Debug.WriteLine($"[Grid] Picked {pickCoords.X},{pickCoords.Y}");
 
                                     pickedIndex = map[pickCoords.X, pickCoords.Y, dragLayer];
@@ -133,6 +135,7 @@ namespace Retrodactyl.Chess
                                 picked.Color = new Color(255, 255, 255, 255);
                                 picked = null;
                                 moves = null;
+                                movesOccupied = null;
                             }
                             if (draggingSprite != null)
                             {
@@ -233,16 +236,28 @@ namespace Retrodactyl.Chess
                 }
             }
 
-            shadow = new CircleShape(12);
-            shadow.OutlineThickness = 2;
-            shadow.FillColor = new Color(0,0,0,64 );
-            shadow.OutlineColor = new Color(0, 0, 0, 32);
-            shadow.Origin = shadow.GetGlobalBounds().GetCenter();
+            moveMarker = new CircleShape(13);
+            moveMarker.OutlineThickness = 1;
+            moveMarker.FillColor = new Color(0,0,0,64 );
+            moveMarker.OutlineColor = new Color(0, 0, 0, 32);
+            moveMarker.Origin = moveMarker.GetGlobalBounds().GetCenter();
+
+            moveMarkerOccupied = new CircleShape(24);
+            moveMarkerOccupied.FillColor = new Color(0, 0, 0, 0);
+            moveMarkerOccupied.OutlineThickness = 6;
+            moveMarkerOccupied.OutlineColor = new Color(0, 0, 0, 64);
+            moveMarkerOccupied.Origin = moveMarkerOccupied.GetGlobalBounds().GetCenter();
         }
 
+        protected Text boardSquareLabel;
+        protected Font font;
+
         protected abstract List<Vector2i> GetMoves(GamePiece gamePiece, Vector2i from);
+        protected abstract List<Vector2i> GetMovesOccupied(GamePiece gamePiece, Vector2i from);
 
         private List<Vector2i> moves;
+        private List<Vector2i> movesOccupied;
+
         public bool Enabled { get; set; }
 
         public int this[int x, int y, int z]
@@ -330,7 +345,8 @@ namespace Retrodactyl.Chess
         }
 
         //protected Sprite shadow;
-        protected CircleShape shadow;
+        protected CircleShape moveMarker;
+        protected CircleShape moveMarkerOccupied;
 
         public virtual void Draw(RenderTarget target, RenderStates states)
         {
@@ -338,22 +354,27 @@ namespace Retrodactyl.Chess
             {
                 foreach (var move in moves)
                 {
-                    /*
-                    var pos = move.ToVector2f().Mul(tileSize).Mul(scale);
-                    var size = shadow.GetGlobalBounds().GetSize();
-                    var offset = (ScaledTileSize - size) / 2.0f;
-                    offset.Y -= 24;
-                    shadow.Position = Position + pos + offset;
-                    */
                     var pos = move.ToVector2f().Mul(tileSize).Mul(scale);
                     var offset = ScaledTileSize / 2.0f;
-                    shadow.Position = Position + pos + offset;
-                    shadow.Draw(window, RenderStates.Default);
+                    moveMarker.Position = Position + pos + offset;
+                    moveMarker.Draw(window, RenderStates.Default);
                 }
             }
-            for (var z = 0; z < mapLayers; z++) {
+            if (movesOccupied != null)
+            {
+                foreach (var move in movesOccupied)
+                {
+                    var pos = move.ToVector2f().Mul(tileSize).Mul(scale);
+                    var offset = ScaledTileSize / 2.0f;
+                    moveMarkerOccupied.Position = Position + pos + offset;
+                    moveMarkerOccupied.Draw(window, RenderStates.Default);
+                }
+            }
 
-                var drawList = new List<GamePiece>();
+            // draw the board
+            var drawList = new List<GamePiece>();
+            for (var z = 0; z < mapLayers; z++) 
+            {
                 for (var y = 0; y < mapSize.Y; y++)
                 {
                     for (var x = 0; x < mapSize.X; x++)
@@ -368,7 +389,7 @@ namespace Retrodactyl.Chess
                             Vector2f tileOffset = default;
 
                             tileOffset = (ScaledTileSize - tileCalculatedSize) / 2.0f;                                
-                            tileOffset.Y -= 24;
+                            tileOffset.Y -= 26;
 
                             if (tile.isMoving || !tile.moveFinished)
                             {
@@ -377,39 +398,62 @@ namespace Retrodactyl.Chess
                             else {
                                 tile.Position = Position + tilePosition + tileOffset;
                             }
-
-                            //RectangleShape background;
-                            //background = new RectangleShape(ScaledTileSize);
-                            //background.FillColor = new Color(0,0,255,48);
-                            //background.Position = Position + tilePosition;
-                            //background.Draw(target, states);
-                            //tile.Draw(target, states);
                             drawList.Add(tile);
                         }
                     }
                 }
+            }
 
-                drawList.Sort((a, b) => ((int)a.Position.Y - (int)b.Position.Y));// - ((a.beingTaken ? 1 : 0) - (b.beingTaken ? 1 : 0)));
-                foreach (var spr in drawList.Where(x=>x.beingTaken))
+            //draw board square labels
+            for (var x = 0; x < mapSize.X; x++)
+            {
+                var board_pos = new Vector2f(x, 7);
+                var pos = board_pos.Mul(tileSize).Mul(scale);
+                boardSquareLabel.DisplayedString = new Square(x, 7).file.ToString();
+                if (x % 2 == 0)
                 {
-                    spr.Draw(target, states);
+                    boardSquareLabel.FillColor = new Color(255, 255, 255, 148);
+                    boardSquareLabel.OutlineColor = new Color(0, 0, 0, 64);
                 }
-                foreach (var spr in drawList.Where(x => !x.beingTaken))
+                else
                 {
-                    spr.Draw(target, states);
+                    boardSquareLabel.FillColor = new Color(0, 0, 0, 148);
+                    boardSquareLabel.OutlineColor = new Color(255, 255, 255, 64);
                 }
-                /*
-                foreach (var spr in drawList.Where(x=> !x.isMoving))
-                {
-                    spr.Draw(target, states);
-                }
-                foreach (var spr in drawList.Where(x => x.isMoving))
-                {
-                    spr.Draw(target, states);
-                }
-                */
 
+                var offset = ScaledTileSize.Sub(new Vector2f(12f, 22f));// + boardSquareLabel.GetGlobalBounds().GetSize().Mul(0.5f);
+                boardSquareLabel.Position = Position + pos + offset;
+                boardSquareLabel.Draw(window, RenderStates.Default);
+            }
+            for (var y = 0; y < mapSize.Y; y++)
+            {
+                var board_pos = new Vector2f(0, y);
+                var pos = board_pos.Mul(tileSize).Mul(scale);
+                boardSquareLabel.DisplayedString = new Square(0, y).rank.ToString();
+                if (y % 2 != 0)
+                {
+                    boardSquareLabel.FillColor = new Color(255, 255, 255, 148);
+                    boardSquareLabel.OutlineColor = new Color(0, 0, 0, 64);
+                }
+                else
+                {
+                    boardSquareLabel.FillColor = new Color(0, 0, 0, 148);
+                    boardSquareLabel.OutlineColor = new Color(255, 255, 255, 64);
+                }
+                var offset = new Vector2f(4, 2); //ScaledTileSize - boardSquareLabel.GetGlobalBounds().GetSize().Add(8f);
+                boardSquareLabel.Position = Position + pos + offset;
+                boardSquareLabel.Draw(window, RenderStates.Default);
+            }
 
+            //draw the pieces
+            drawList.Sort((a, b) => ((int)a.Position.Y - (int)b.Position.Y));
+            foreach (var spr in drawList.Where(x => x.beingTaken))
+            {
+                spr.Draw(target, states);
+            }
+            foreach (var spr in drawList.Where(x => !x.beingTaken))
+            {
+                spr.Draw(target, states);
             }
 
             if (draggingSprite != null)
